@@ -2,7 +2,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 import { user } from "../model/user.model";
-import { BadRequestError } from "../utils/errorHandling/exceptions";
+import { BadRequestError, UnauthorizedError } from "../utils/errorHandling/exceptions";
 
 dotenv.config();
 
@@ -25,7 +25,7 @@ class AuthService {
 
         } catch (error) {
             console.error(error);
-            throw new BadRequestError("Failed to sign up");
+            throw new BadRequestError("Failed to sign up", 400);
         }
     }
 
@@ -34,7 +34,7 @@ class AuthService {
         try {
             const userDetails = await user.findOne({ username });
             if (!userDetails) {
-                throw new BadRequestError("User not found");
+                throw new UnauthorizedError("User not found", 401);
             }
 
             const savedHashedPassword = userDetails.password;
@@ -42,13 +42,13 @@ class AuthService {
 
             const isPasswordCorrect = await bcrypt.compare(password, savedHashedPassword);
             if (!isPasswordCorrect) {
-                throw new BadRequestError("Invalid password");
+                throw new UnauthorizedError("Invalid password", 401);
             }
 
             const token = jwt.sign({ userId }, process.env.JWT_SECRET!, { expiresIn: "1h" });
             return token;
         } catch (error) {
-            throw new BadRequestError("Failed to login");
+            throw new BadRequestError("Failed to login", 400);
         }
     }
 }
