@@ -8,7 +8,6 @@ npm-debug.log*
 
 # Environment variables
 .env
-deployment.txt
 # Build output
 dist/
 build/
