@@ -1,5 +1,6 @@
 import dotenv from "dotenv";
-import express from "express";
+import express, { NextFunction, Request, Response } from "express";
+import { CustomError } from "./utils/errorHandling/exceptions";
 dotenv.config();
 
 export const app = express();
@@ -11,3 +12,9 @@ app.get("/", (req, res) => {
 });
 
 
+app.use((err: any, req: any, res: any, next: NextFunction) => {
+    if (err instanceof CustomError) {
+        return res.status(err.statusCode).json(err.serializeErrors());
+    }
+    res.status(500).json({ message: "Internal Server Error" });
+});
